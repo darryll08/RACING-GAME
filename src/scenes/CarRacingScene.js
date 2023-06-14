@@ -5,12 +5,17 @@ export default class CarRacingScene extends Phaser.Scene {
         super ('racing-scene')
     }
 
-    init(){
-        this.player = undefined
+    init(data){
+        this.player = data.car
+        this.road = undefined
+        this.cursor = undefined
+        this.tribune_left = undefined
+        this.tribune_right = undefined
     }
 
 
     preload(){
+        this.load.image('background', 'images/bg_layer1.png')
         this.load.image('car', 'images/car.png')
         this.load.image('car2', 'images/car2.png')
         this.load.image('car3', 'images/car3.png')
@@ -32,20 +37,91 @@ export default class CarRacingScene extends Phaser.Scene {
         this.load.image('tree_large', 'images/tree_large.png')
         this.load.image('tree_small', 'images/tree_small.png')
         this.load.image('tribune_full', 'images/tribune_full.png')
-
-
     }
 
 
     create(){
-       this.player = this.add.image(240, 320, 'car') 
+      const gameWidth = this.scale.width * 0.5;
+      const gameHeight = this.scale.height * 0.5;
+      // background
+      this.add.image(gameWidth, gameHeight, 'background')
 
+      // add road
+      this.road = this.physics.add.group({
+        key: 'road',
+        repeat: 5,
+        setXY: { x: 240, y: 0, stepX: 0, stepY: 160 },
+        setScale: { x: 3.5, y: 3.5 }
+      })
+
+      // add tribune on the left and right side of the road
+      this.tribune_left = this.physics.add.group({
+        key: 'tribune_full',
+        repeat: 4,
+        setXY: { x: 75, y: 0, stepX: 0, stepY: 220 },
+        setScale: { x: 0.5, y: 0.5 }
+      }).rotate(-1.5708).setDepth(1)
+
+      this.tribune_right = this.physics.add.group({
+        key: 'tribune_full',
+        repeat: 4,
+        setXY: { x: 405, y: 0, stepX: 0, stepY: 220 },
+        setScale: { x: 0.5, y: 0.5 }
+      }).rotate(1.5708).setDepth(1)
+
+      // add car to the scene from ChooseCarScene
+      this.player = this.physics.add.sprite(240, 500, this.player.texture.key)
+      // set size of the car without scaling and setSize
+      this.player.displayWidth = 50
+      this.player.displayHeight = 100
+
+      // set the car to collide with the world bounds so it doesn't go off screen
+      this.player.setCollideWorldBounds(true)
+
+      // make player move with arrow keys ( left and right )
+      this.cursor = this.input.keyboard.createCursorKeys()
 
     }
 
 
     update(){
+      // make player move with arrow keys ( left and right )
+      if (this.cursor.left.isDown) {
+        this.player.setVelocityX(-200)
+      }
+      else if (this.cursor.right.isDown) {
+        this.player.setVelocityX(200)
+      }
+      else {
+        this.player.setVelocityX(0)
+      }
 
+      // make the road move
+      // @ts-ignore
+      this.road.children.iterate((child) => {
+        child.y += 30
+        if (child.y > 720) {
+          child.y = -160
+        }
+      })
+
+      // make the tribune move
+      // @ts-ignore
+      this.tribune_left.children.iterate((child) => {
+        child.y += 2
+        if (child.y > 720) {
+          child.y = -160
+        }
+      })
+
+      // make the tribune move
+      // @ts-ignore
+      this.tribune_right.children.iterate((child) => {
+        child.y += 2
+        if (child.y > 720) {
+          child.y = -160
+        }
+      })
     }
 
 
