@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import FallingObject from "../class/FallingObject";
 
 export default class CarRacingScene extends Phaser.Scene {
     constructor(){
@@ -11,6 +12,7 @@ export default class CarRacingScene extends Phaser.Scene {
         this.cursor = undefined
         this.tribune_left = undefined
         this.tribune_right = undefined
+        this.obstacles = undefined
     }
 
 
@@ -58,16 +60,31 @@ export default class CarRacingScene extends Phaser.Scene {
       this.tribune_left = this.physics.add.group({
         key: 'tribune_full',
         repeat: 4,
-        setXY: { x: 75, y: 0, stepX: 0, stepY: 220 },
+        setXY: { x: 75, y: 0, stepX: 0, stepY: 224 },
         setScale: { x: 0.5, y: 0.5 }
       }).rotate(-1.5708).setDepth(1)
 
       this.tribune_right = this.physics.add.group({
         key: 'tribune_full',
         repeat: 4,
-        setXY: { x: 405, y: 0, stepX: 0, stepY: 220 },
+        setXY: { x: 405, y: 0, stepX: 0, stepY: 224 },
         setScale: { x: 0.5, y: 0.5 }
       }).rotate(1.5708).setDepth(1)
+
+      // add obstacles
+      this.obstacles = this.physics.add.group({
+        classType: FallingObject,
+        maxSize: 10,
+        runChildUpdate: true,
+      })
+
+      // spawn obstacles
+      this.time.addEvent({
+        delay: Phaser.Math.Between(1000, 2000),
+        callback: this.spawnObstacle,
+        callbackScope: this,
+        loop: true
+      })
 
       // add car to the scene from ChooseCarScene
       this.player = this.physics.add.sprite(240, 500, this.player.texture.key)
@@ -96,6 +113,15 @@ export default class CarRacingScene extends Phaser.Scene {
         this.player.setVelocityX(0)
       }
 
+      // limit the player movement to the road
+      if (this.player.x < 160) {
+        this.player.x = 160
+      }
+      else if (this.player.x > 320) {
+        this.player.x = 320
+      }
+
+
       // make the road move
       // @ts-ignore
       this.road.children.iterate((child) => {
@@ -109,8 +135,8 @@ export default class CarRacingScene extends Phaser.Scene {
       // @ts-ignore
       this.tribune_left.children.iterate((child) => {
         child.y += 2
-        if (child.y > 720) {
-          child.y = -160
+        if (child.y > 890) {
+          child.y = -220
         }
       })
 
@@ -118,11 +144,30 @@ export default class CarRacingScene extends Phaser.Scene {
       // @ts-ignore
       this.tribune_right.children.iterate((child) => {
         child.y += 2
-        if (child.y > 720) {
-          child.y = -160
+        if (child.y > 890) {
+          child.y = -220
         }
       })
     }
 
+    spawnObstacle(){
+      const config = {
+        speed: 200,
+      }
 
+      // list of obstacles
+      const obstacles = [ 'barrel_blue_down', 'barrel_blue', 'barrel_red_down', 'barrel_red', 'cone_down', 'motor1', 'oil', 'rock1', 'rock2', 'rock3']
+      // @ts-ignore
+      const obstacle = this.obstacles.get(0, 0, Phaser.Math.RND.pick(obstacles), config)
+
+      // rescale the obstacle
+      obstacle.displayWidth = obstacle.width * 0.5
+      obstacle.displayHeight = obstacle.height * 0.5
+
+      const positionX = Phaser.Math.Between(150, 330);
+  
+      if (obstacle) {
+        obstacle.spawn(positionX);
+      }
+    }
 }
