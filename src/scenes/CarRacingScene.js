@@ -13,6 +13,12 @@ export default class CarRacingScene extends Phaser.Scene {
         this.tribune_left = undefined
         this.tribune_right = undefined
         this.obstacles = undefined
+        this.life = 3
+        this.lifeLabel = undefined
+        this.score = 0
+        this.scoreLabel = undefined
+        this.speedTimer = 10
+        this.speed = 200
     }
 
 
@@ -86,6 +92,14 @@ export default class CarRacingScene extends Phaser.Scene {
         loop: true
       })
 
+      // speed timer
+      this.time.addEvent({
+        delay: 1000,
+        callback: this.timer,
+        callbackScope: this,
+        loop: true
+      })
+
       // add car to the scene from ChooseCarScene
       this.player = this.physics.add.sprite(240, 500, this.player.texture.key)
       // set size of the car without scaling and setSize
@@ -97,6 +111,23 @@ export default class CarRacingScene extends Phaser.Scene {
 
       // make player move with arrow keys ( left and right )
       this.cursor = this.input.keyboard.createCursorKeys()
+
+      // Life label
+      this.lifeLabel = this.add.text(10, 30, 'Life', {
+        fontSize : '16px',
+        color: 'black',
+        backgroundColor: 'white'
+      }).setDepth(1);
+
+      // Score label
+      this.scoreLabel = this.add.text(10, 10, 'Score', {
+        fontSize : '16px',
+        color: 'black',
+        backgroundColor: 'white'
+      }).setDepth(1);
+
+      // overlap between player and obstacles
+      this.physics.add.overlap(this.player, this.obstacles, this.decreaseLife, null, this);
 
     }
 
@@ -148,11 +179,16 @@ export default class CarRacingScene extends Phaser.Scene {
           child.y = -220
         }
       })
+
+      // life label
+      this.lifeLabel.text = `Life: ${this.life}`
+      // score label
+      this.scoreLabel.text = `Score: ${this.score}`
     }
 
     spawnObstacle(){
       const config = {
-        speed: 200,
+        speed: this.speed,
       }
 
       // list of obstacles
@@ -169,5 +205,28 @@ export default class CarRacingScene extends Phaser.Scene {
       if (obstacle) {
         obstacle.spawn(positionX);
       }
+
+      // increase score when obstacle spawn
+      this.score += 5
+
     }
+
+    // decrease life when player collide with obstacle
+    decreaseLife(player, obstacle){
+      this.life -= 1
+      obstacle.destroy()
+      if (this.life == 0) {
+        this.scene.start('game-over-scene', { score: this.score })
+      }
+    }
+
+    timer(){
+      this.speedTimer -= 1
+
+      if (this.speedTimer == 0) {
+        this.speed += 50
+        this.speedTimer = 10
+      }
+    }
+
 }
