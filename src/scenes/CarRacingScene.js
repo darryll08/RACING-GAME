@@ -45,6 +45,8 @@ export default class CarRacingScene extends Phaser.Scene {
         this.load.image('tree_large', 'images/tree_large.png')
         this.load.image('tree_small', 'images/tree_small.png')
         this.load.image('tribune_full', 'images/tribune_full.png')
+        this.load.image('Game-Over-Icon-PNG-File', 'images/Game-Over-Icon-PNG-File.png' )
+        this.load.image('background1', 'background1.png')
     }
 
 
@@ -52,7 +54,7 @@ export default class CarRacingScene extends Phaser.Scene {
       const gameWidth = this.scale.width * 0.5;
       const gameHeight = this.scale.height * 0.5;
       // background
-      this.add.image(gameWidth, gameHeight, 'background')
+      this.add.image(gameWidth, gameHeight, 'background1')
 
       // add road
       this.road = this.physics.add.group({
@@ -197,8 +199,8 @@ export default class CarRacingScene extends Phaser.Scene {
       const obstacle = this.obstacles.get(0, 0, Phaser.Math.RND.pick(obstacles), config)
 
       // rescale the obstacle
-      obstacle.displayWidth = obstacle.width * 0.5
-      obstacle.displayHeight = obstacle.height * 0.5
+      obstacle.displayWidth = obstacle.width * 0.55
+      obstacle.displayHeight = obstacle.height * 0.55
 
       const positionX = Phaser.Math.Between(150, 330);
   

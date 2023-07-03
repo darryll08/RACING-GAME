@@ -26,7 +26,7 @@ export default class ChooseCarScene extends Phaser.Scene {
       this.add.image(gameWidth, gameHeight, 'background')
 
       // Text for choose car
-      this.add.text(100, 100, 'Choose your car', { fontSize: '32px', color: '#000' })
+      this.add.text(100, 100, 'CHOOSE YOUR CAR', { fontSize: '32px', color: '#000' })
 
       // make a choose car menu
       this.car_temp1 = this.physics.add.sprite(120, 400, 'car1').setInteractive().setScale(0.35)
